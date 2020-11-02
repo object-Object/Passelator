@@ -11,7 +11,15 @@ CREATE TABLE IF NOT EXISTS guild_settings (
 	disabled_modules TEXT DEFAULT "{}",
 	command_permissions TEXT DEFAULT "{}",
 	prefix TEXT DEFAULT "]]..options.defaultPrefix..[[",
+	mass_ping_cooldown REAL DEFAULT ]]..options.defaultMassPingCooldown..[[,
 	delete_command_messages BOOLEAN DEFAULT 0 NOT NULL CHECK (delete_command_messages IN (0,1))
+);
+]])
+conn:exec([[
+CREATE TABLE IF NOT EXISTS ping_cooldowns (
+	guild_id TEXT PRIMARY KEY,
+	end_timestamp REAL,
+	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
 );
 ]])
 print("Done.")

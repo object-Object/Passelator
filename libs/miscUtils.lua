@@ -117,12 +117,8 @@ utils.logError = function(guild, err)
 	}})
 end
 
-utils.name = function(user, guild)
-	local member = guild and guild:getMember(user.id)
-	if member then
-		return member.name~=user.name and member.name.." ("..user.tag..")" or user.tag
-	end
-	return user.tag
+utils.name = function(user)
+	return user.mentionString.." ("..user.tag..")"
 end
 
 utils.secondsFromString = function(str)
