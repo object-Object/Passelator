@@ -90,6 +90,26 @@ client:on("userBan", function(user, guild)
 end)
 ]]
 
+client:on("reactionAdd", function(reaction, userId)
+	if not reaction.message.guild then return end
+	doModulesPcall(moduleHandler.tree.client.reactionAdd, reaction.message.guild, conn, reaction, userId, conn)
+end)
+
+client:on("reactionAddUncached", function(channel, messageId, hash, userId)
+	if not channel.guild then return end
+	doModulesPcall(moduleHandler.tree.client.reactionAddUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
+end)
+
+client:on("reactionRemove", function(reaction, userId)
+	if not reaction.message.guild then return end
+	doModulesPcall(moduleHandler.tree.client.reactionRemove, reaction.message.guild, conn, reaction, userId, conn)
+end)
+
+client:on("reactionRemoveUncached", function(channel, messageId, hash, userId)
+	if not channel.guild then return end
+	doModulesPcall(moduleHandler.tree.client.reactionRemoveUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
+end)
+
 client:on("messageCreate", function(message)
 	local success, err = pcall(function()
 		if message.author.bot

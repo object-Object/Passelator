@@ -137,7 +137,7 @@ commandHandler.sendCommandHelp = function(channel, guildSettings, command)
 end
 
 commandHandler.sendPermissionError = function(channel, commandString, missingPermissions)
-	return utils.sendEmbed(channel, "You may not use this command because you are missing the following required permission"..utils.s(#missingPermissions)..": "..table.concat(missingPermissions, ", "), "ff0000")
+	return utils.sendEmbed(channel, "You may not use this command because you are missing the following required permission"..utils.s(#missingPermissions)..": `"..table.concat(missingPermissions, "`, `").."`", "ff0000")
 end
 
 commandHandler.enable = function(commandString, message, guildSettings, conn)
@@ -189,8 +189,8 @@ end
 commandHandler.getMissingPermissions = function(member, permissions)
 	local missingPermissions = {}
 	for _,permission in pairs(permissions) do
-		if permission:match("^yot%.") then
-			if not commandHandler.customPermissions[permission:match("^yot%.(.+)")](member) then
+		if permission:match("^bot%.") then
+			if not commandHandler.customPermissions[permission:match("^bot%.(.+)")](member) then
 				table.insert(missingPermissions, permission)
 			end
 		else

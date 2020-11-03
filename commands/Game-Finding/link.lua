@@ -1,15 +1,13 @@
 local commandHandler = require("commandHandler")
-local utils = require("miscUtils")
 
 return {
-	name = "restart",
-	description = "Restarts the bot.",
-	usage = "",
-	visible = false,
-	permissions = {"bot.botOwner"},
+	name = "link",
+	description = "Alias for `&prefix;code`.",
+	usage = commandHandler.commands.code.usage,
+	visible = true,
+	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
-		utils.sendEmbed(message.channel, "Restarting.", "00ff00")
-		os.exit()
+		commandHandler.commands.code:run(message, argString, args, guildSettings, conn)
 	end,
 	onEnable = function(self, message, guildSettings)
 		return true
