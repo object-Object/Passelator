@@ -7,7 +7,7 @@ return {
 	visible = false,
 	disabledByDefault = false,
 	run = function(self, guildSettings, channel, messageId, hash, userId, conn)
-		if channel.id~=guildSettings.games_channel_id or hash~="✅" then return end
+		if channel.id~=guildSettings.games_channel_id or hash~="✅" or userId==channel.client.user.id then return end
 
 		local stmt = conn:prepare("SELECT * FROM games WHERE message_id = ?;")
 		local row = utils.formatRow(stmt:reset():bind(messageId):resultset("k"))
