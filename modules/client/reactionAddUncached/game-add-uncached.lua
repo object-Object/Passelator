@@ -20,8 +20,9 @@ return {
 		local role = channel.guild:getRole(row.role_id)
 		local voiceChannel = channel.guild:getChannel(row.voice_channel_id)
 		local gameMessage = channel:getMessage(messageId)
+		local groupAuthor = channel.client:getUser(row.author_id)
 
-		gameMessage:setEmbed(groupUtils.getGroupEmbed(member.user, row.game_num, row.name, role, voiceChannel, row.voice_channel_invite, row.game_code))
+		gameMessage:setEmbed(groupUtils.getGroupEmbed(groupAuthor, row.game_num, row.name, role, voiceChannel, row.voice_channel_invite, row.game_code))
 	end,
 	onEnable = function(self, message, guildSettings, conn)
 		return true
