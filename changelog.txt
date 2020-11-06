@@ -1,3 +1,6 @@
+**v1.1.2** - 2020-11-06
++ Add ability for people other than the group owner to set the game code/link; the group owner must authorize it via reactions
+
 **v1.1.1** - 2020-11-03
 * Fix bug where the bot sometimes gave itself the game group role
 * Fix bug where the embed author would be set to the last user to add/remove the role by reacting
