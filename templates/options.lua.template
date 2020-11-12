@@ -1,10 +1,8 @@
 return {
-	token="token", -- Discord bot token
-	clientOptions={ -- client options for Discordia
-		cacheAllMembers=true
+	token = "", -- Discord API bot token
+	clientOptions = { -- Discordia client options; don't change this unless you think it's necessary
+		cacheAllMembers = true,
 	},
-	-- the following settings are defaults used in the database setup
-	-- changing them here after setting up the database WILL NOT affect the values in the database
-	-- they are here because the bot uses them in certain messages to users
-	defaultPrefix="$", -- default command prefix
+	defaultPrefix = "p.", -- default command prefix, used in database creation
+	defaultMassPingCooldown = "10800", -- default mass ping cooldown in seconds, used in database creation
 }
