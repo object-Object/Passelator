@@ -3,8 +3,8 @@ local utils = require("miscUtils")
 local discordia = require("discordia")
 
 return {
-	name = "gameschannel",
-	description = "Sets the games channel, in which game group messages will be sent. Must provide the channel's id, **not** the channel mention.",
+	name = "groupchannel",
+	description = "Sets the group channel, in which group messages will be sent. Must provide the channel's id, **not** the channel mention.",
 	usage = "<channel id>",
 	visible = true,
 	permissions = {"administrator"},
@@ -20,9 +20,9 @@ return {
 			return
 		end
 
-		conn:exec("UPDATE guild_settings SET games_channel_id = '"..channel.id.."' WHERE guild_id = '"..message.guild.id.."';")
+		conn:exec("UPDATE guild_settings SET group_channel_id = '"..channel.id.."' WHERE guild_id = '"..message.guild.id.."';")
 
-		utils.sendEmbed(message.channel, "Games channel set to "..channel.mentionString..".", "00ff00")
+		utils.sendEmbed(message.channel, "Group channel set to "..channel.mentionString..".", "00ff00")
 	end,
 	onEnable = function(self, message, guildSettings)
 		return true

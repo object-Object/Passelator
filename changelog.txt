@@ -1,3 +1,13 @@
+**v1.2.0** - 2020-11-22
++ Add the ability to change a group's name using `&prefix;name`
++ Add a Date/Time field in groups, which can be set using `&prefix;datetime`
++ Add the ability for group authors to lock groups to stop people from getting or removing the role, using `&prefix;lock` (can be unlocked using `&prefix;unlock`)
+* Rename games to groups
+* When someone other than the group creator is trying to set the code, the user who sent the message can now react X to cancel
+* Increase prompt timeout from 5 minutes to 15 minutes
+* Fix `&prefix;changelog` command always showing full changelog
+- Remove `&prefix;link` (just an alias for `&prefix;code`)
+
 **v1.1.2** - 2020-11-06
 + Add ability for people other than the group owner to set the game code/link; the group owner must authorize it via reactions
 

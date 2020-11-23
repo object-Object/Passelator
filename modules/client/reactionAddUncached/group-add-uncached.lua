@@ -2,27 +2,27 @@ local utils = require("miscUtils")
 local groupUtils = require("groupUtils")
 
 return {
-	name = "game-add-uncached",
-	description = "Adds a game group role to a user when they click the reaction.",
+	name = "group-add-uncached",
+	description = "Adds a group role to a user when they click the reaction.",
 	visible = false,
 	disabledByDefault = false,
 	run = function(self, guildSettings, channel, messageId, hash, userId, conn)
-		if channel.id~=guildSettings.games_channel_id or hash~="✅" or userId==channel.client.user.id then return end
+		if channel.id~=guildSettings.group_channel_id or hash~="✅" or userId==channel.client.user.id then return end
 
-		local stmt = conn:prepare("SELECT * FROM games WHERE message_id = ?;")
+		local stmt = conn:prepare("SELECT * FROM groups WHERE message_id = ?;")
 		local row = utils.formatRow(stmt:reset():bind(messageId):resultset("k"))
 		stmt:close()
-		if not row then return end
+		if not row or row.is_locked then return end
 
 		local member = channel.guild:getMember(userId)
 		member:addRole(row.role_id)
 
 		local role = channel.guild:getRole(row.role_id)
 		local voiceChannel = channel.guild:getChannel(row.voice_channel_id)
-		local gameMessage = channel:getMessage(messageId)
-		local groupAuthor = channel.client:getUser(row.author_id)
+		local groupMessage = channel:getMessage(messageId)
+		local creator = channel.client:getUser(row.creator_id)
 
-		gameMessage:setEmbed(groupUtils.getGroupEmbed(groupAuthor, row.game_num, row.name, role, voiceChannel, row.voice_channel_invite, row.game_code))
+		groupMessage:setEmbed(groupUtils.getGroupEmbed(creator, row.group_num, row.name, role, voiceChannel, row.voice_channel_invite, row.code, row.is_locked, row.date_time))
 	end,
 	onEnable = function(self, message, guildSettings, conn)
 		return true

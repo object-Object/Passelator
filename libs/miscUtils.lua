@@ -25,12 +25,11 @@ local jsonColumns=utils.createLookupTable{
 	"disabled_commands",
 	"disabled_modules",
 	"persistent_roles",
-	"command_permissions",
-	"roles"
+	"command_permissions"
 }
 local booleanColumns=utils.createLookupTable{
 	"delete_command_messages",
-	"is_active"
+	"is_locked"
 }
 
 utils.divmod = function(a, b)

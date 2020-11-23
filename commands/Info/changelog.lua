@@ -7,7 +7,7 @@ local function sendChangelog(channel, prefix, latestOnly)
 	local changelog=fs.readFileSync("changelog.txt")
 	changelog=changelog:gsub("%&prefix%;", prefix)
 	if latestOnly then
-		changelog=changelog:gsub("\n\n.*","")
+		changelog=changelog:gsub("\r?\n\r?\n.*","")
 	end
 	if #changelog>2000 then
 		local splitChangelog={""}

@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS guild_settings (
 	prefix TEXT DEFAULT "]]..options.defaultPrefix..[[",
 	mass_ping_cooldown REAL DEFAULT ]]..options.defaultMassPingCooldown..[[,
 	delete_command_messages BOOLEAN DEFAULT 0 NOT NULL CHECK (delete_command_messages IN (0,1)),
-	games_category_id TEXT,
-	games_channel_id TEXT,
-	next_game_num REAL DEFAULT 1
+	group_category_id TEXT,
+	group_channel_id TEXT,
+	next_group_num REAL DEFAULT 1
 );
 ]])
 conn:exec([[
@@ -26,17 +26,19 @@ CREATE TABLE IF NOT EXISTS ping_cooldowns (
 );
 ]])
 conn:exec([[
-CREATE TABLE IF NOT EXISTS games (
-	game_num REAL,
+CREATE TABLE IF NOT EXISTS groups (
+	group_num REAL,
 	name TEXT,
-	author_id TEXT,
+	creator_id TEXT,
 	guild_id TEXT,
 	message_id TEXT,
 	voice_channel_id TEXT,
 	voice_channel_invite TEXT,
 	role_id TEXT,
-	game_code TEXT,
-	PRIMARY KEY (game_num, guild_id),
+	code TEXT,
+	date_time TEXT,
+	is_locked BOOLEAN DEFAULT 0 NOT NULL CHECK (is_locked IN (0,1)),
+	PRIMARY KEY (group_num, guild_id),
 	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
 );
 ]])

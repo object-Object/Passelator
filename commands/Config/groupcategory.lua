@@ -3,8 +3,8 @@ local utils = require("miscUtils")
 local discordia = require("discordia")
 
 return {
-	name = "gamescategory",
-	description = "Sets the games category, in which voice channels will be created for game groups.",
+	name = "groupcategory",
+	description = "Sets the group category, in which voice channels will be created for groups. We recommended making this the same category that the group channel is in, for clarity purposes.\nPlease provide the category's id, NOT the name.",
 	usage = "<category id>",
 	visible = true,
 	permissions = {"administrator"},
@@ -20,9 +20,9 @@ return {
 			return
 		end
 
-		conn:exec("UPDATE guild_settings SET games_category_id = '"..category.id.."' WHERE guild_id = '"..message.guild.id.."';")
+		conn:exec("UPDATE guild_settings SET group_category_id = '"..category.id.."' WHERE guild_id = '"..message.guild.id.."';")
 
-		utils.sendEmbed(message.channel, "Games category set to "..category.name..".", "00ff00")
+		utils.sendEmbed(message.channel, "Group category set to "..category.name..".", "00ff00")
 	end,
 	onEnable = function(self, message, guildSettings)
 		return true

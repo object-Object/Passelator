@@ -3,7 +3,7 @@ local utils = require("miscUtils")
 
 local groupUtils = {}
 
-groupUtils.getGroupEmbed = function(author, gameNum, name, role, voiceChannel, vcInviteLink, code)
+groupUtils.getGroupEmbed = function(creator, groupNum, name, role, voiceChannel, vcInviteLink, code, isLocked, dateTime)
 	local members = ""
 	for _,m in ipairs(role.members:toArray("name")) do
 		members = members..utils.name(m.user).."\n"
@@ -12,29 +12,30 @@ groupUtils.getGroupEmbed = function(author, gameNum, name, role, voiceChannel, v
 
 	return {
 		author = {
-			name = author.tag,
-			icon_url = author.avatarURL
+			name = creator.tag,
+			icon_url = creator.avatarURL
 		},
-		title = "Game #"..gameNum.." - "..name,
-		description = "React with :white_check_mark: to get the role!",
+		title = (isLocked and ":lock: " or "").."Group #"..groupNum.." - "..name,
+		description = (isLocked and "This group is currently locked. You may not get or remove the role until the creator unlocks it." or "React with :white_check_mark: to get the role!"),
 		fields = {
 			{name = "Role", value = role.mentionString, inline = true},
-			{name = "Voice Channel", value = "["..voiceChannel.name.."]("..vcInviteLink..")", inline = true},
 			{name = "Game Code/Link", value = code, inline = true},
-			{name = "Members", value = members, inline = false}
+			{name = "Date/Time", value = dateTime, inline = true},
+			{name = "Voice Channel", value = "["..voiceChannel.name.."]("..vcInviteLink..")", inline = true},
+			{name = "Members", value = members, inline = false},
 		},
 		color = discordia.Color.fromHex("00ff00").value
 	}
 end
 
-groupUtils.getDeletedGroupEmbed = function(author, game_num, name)
+groupUtils.getDeletedGroupEmbed = function(creator, group_num, name)
 	return {
 		author = {
-			name = author.tag,
-			icon_url = author.avatarURL
+			name = creator.tag,
+			icon_url = creator.avatarURL
 		},
-		title = "Game #"..game_num.." - "..name,
-		description = "This game group has been deleted by its creator.",
+		title = "Group #"..group_num.." - "..name,
+		description = "This group has been deleted by its creator.",
 		color = discordia.Color.fromHex("ff0000").value
 	}
 end
