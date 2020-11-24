@@ -1,3 +1,6 @@
+**v1.2.1** - 2020-11-24
+* Fix `&prefix;code <group number>` giving no response (should show code for selected group)
+
 **v1.2.0** - 2020-11-22
 + Add the ability to change a group's name using `&prefix;name`
 + Add a Date/Time field in groups, which can be set using `&prefix;datetime`

@@ -30,7 +30,7 @@ return {
 		local promptMessage
 		if #args==1 then
 			-- display code
-			utils.sendEmbed(message.channel, "Game code/link for Group #"..row.group_num..": **"..row.group_code.."**", "00ff00")
+			utils.sendEmbed(message.channel, "Game code/link for Group #"..row.group_num..": **"..row.code.."**", "00ff00")
 			return
 		elseif message.author~=creator then
 			-- not the creator, ask creator to confirm/deny
