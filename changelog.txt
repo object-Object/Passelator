@@ -1,3 +1,6 @@
+**v1.3.2** - 2020-11-30
++ Added more permission checks to `&prefix;new`
+
 **v1.3.1** - 2020-11-30
 * Fixed bug where `&prefix;about` didn't send
 * Updated text of `&prefix;about` slightly
