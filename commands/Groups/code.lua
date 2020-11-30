@@ -8,6 +8,8 @@ return {
 	description = "Displays or sets the game code/link for a group.",
 	usage = "<group number> [new game code/link]",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {"addReactions", "manageMessages"},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

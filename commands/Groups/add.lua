@@ -9,6 +9,8 @@ return {
 	usage = "<group number> <@user> [@user2 @user3 ...]",
 	visible = true,
 	isDefaultDisabled = true,
+	botGuildPermissions = {"manageRoles"},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if #args<2 or #message.mentionedUsers==0 then
@@ -66,10 +68,6 @@ return {
 			}}
 			return
 		end
-
-		local groupChannel = message.guild:getChannel(guildSettings.group_channel_id)
-		local groupMessage = groupChannel:getMessage(row.message_id)
-		groupUtils.updateMembers(groupMessage, role, guildSettings)
 
 		if #invalidUsers==0 then
 			message:reply{embed={

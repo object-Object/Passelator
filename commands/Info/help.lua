@@ -50,6 +50,8 @@ return {
 	description = "Shows the bot's help menu or information about a specific command.",
 	usage = "[command]",
 	visible = true, -- whether or not this command shows up in help and is togglable by users
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {}, -- required permissions to use the command
 	run = function(self, message, argString, args, guildSettings, conn) -- function called when the command is used
 		if argString=="" then

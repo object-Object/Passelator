@@ -7,6 +7,8 @@ return {
 	description = "Locks a group, which prevents users from getting or removing the role.",
 	usage = "<group number>",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

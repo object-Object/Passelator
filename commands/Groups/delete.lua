@@ -7,6 +7,8 @@ return {
 	description = "Deletes a group.",
 	usage = "<group number>",
 	visible = true,
+	botGuildPermissions = {"manageRoles", "manageChannels", "manageMessages"},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then
@@ -27,6 +29,7 @@ return {
 			message.channel:broadcastTyping()
 			
 			message.guild:getRole(row.role_id):delete()
+			conn:exec("DELETE FROM user_roles WHERE guild_id = '"..message.guild.id.."' AND role_id = '"..row.role_id.."';")
 
 			message.guild:getChannel(row.voice_channel_id):delete()
 

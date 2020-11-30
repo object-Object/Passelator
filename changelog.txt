@@ -8,6 +8,7 @@
 + Added `&prefix;contact` to allow users to submit feedback, give suggestions, report bugs in the bot, or just send me nice messages, with the option to report anonymously using `&prefix;contact anonymous`
 + Added the following settings: `Can Add/Remove Users to Locked Groups`, `Can Leave Locked Groups`, `Delete Command Messages`, `Delete Group Messages on Group Delete`, `Give Back Group Roles on Server Rejoin`, `Mass Ping Cooldown Length`
 + Added error messages for when the bot is missing required permissions
+* The invite link in `&prefix;new` now automatically calculates the required permissions
 * `&prefix;new` and `&prefix;delete` now show a typing indicator while the group is being created or deleted
 * `&prefix;massping` is now disabled by default
 * The colour of group messages now changes to yellow when they are locked

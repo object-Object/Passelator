@@ -30,7 +30,7 @@ end
 local function getMembersField(role, guildSettings)
 	local membersTable = role.members:toArray()
 	if guildSettings.give_back_roles then
-		local resultset, nrow = discordia.storage.conn:exec("SELECT user_id FROM user_roles WHERE role_id = '"..role.id.."';")
+		local resultset, nrow = discordia.storage.conn:exec("SELECT user_id FROM user_roles WHERE role_id = '"..role.id.."' AND user_in_guild = 0;")
 		if resultset then
 			for row = 1, nrow do
 				table.insert(membersTable, role.client:getUser(resultset.user_id[row]))

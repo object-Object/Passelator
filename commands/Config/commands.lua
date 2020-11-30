@@ -155,6 +155,8 @@ return {
 	description = "Opens a reaction menu to enable, disable, or modify permissions of commands in this server.",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {"addReactions", "manageMessages"},
 	permissions = {"administrator"},
 	run = function(self, message, argString, args, guildSettings, conn)
 		rm.send(message.channel, message.author, menu, {guildSettings=guildSettings, conn=conn})

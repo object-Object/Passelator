@@ -6,6 +6,8 @@ return {
 	description = "Restarts the bot.",
 	usage = "",
 	visible = false,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {"bot.botOwner"},
 	run = function(self, message, argString, args, guildSettings, conn)
 		utils.sendEmbed(message.channel, "Restarting.", "00ff00")

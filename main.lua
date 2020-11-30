@@ -89,6 +89,10 @@ client:on("memberJoin", function(member)
 	doModulesPcall(moduleHandler.tree.client.memberJoin, member.guild, conn, member, conn)
 end)
 
+client:on("memberUpdate", function(member)
+	doModulesPcall(moduleHandler.tree.client.memberUpdate, member.guild, conn, member, conn)
+end)
+
 client:on("memberLeave", function(member)
 	doModulesPcall(moduleHandler.tree.client.memberLeave, member.guild, conn, member, conn)
 end)

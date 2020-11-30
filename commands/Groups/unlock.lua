@@ -7,6 +7,8 @@ return {
 	description = "Unlocks a group locked using the `&prefix;lock` command.",
 	usage = "<group number>",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

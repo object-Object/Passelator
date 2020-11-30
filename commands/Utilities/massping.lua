@@ -7,6 +7,8 @@ return {
 	usage = "",
 	visible = true,
 	isDefaultDisabled = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {"mentionEveryone"},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		local row, _ = conn:exec("SELECT * FROM ping_cooldowns WHERE guild_id="..message.guild.id..";","k")

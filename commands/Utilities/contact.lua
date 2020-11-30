@@ -1,5 +1,6 @@
 local commandHandler = require("commandHandler")
 local discordia = require("discordia")
+local utils = require("miscUtils")
 local options = discordia.storage.options
 
 return {
@@ -7,6 +8,8 @@ return {
 	description = "Sends a message to the bot's developer. Use this command to submit feedback, give suggestions, report bugs, etc.\nImages cannot be sent. Use Imgur or a similar service to send a link to the image instead.\nThis command **is not anonymous**. Use `&prefix;contact anonymous` to send an anonymous message. Be aware that sending an anonymous bug report makes debugging more difficult.",
 	usage = "<message>",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then
@@ -29,6 +32,7 @@ return {
 				}
 			}
 		}})
+		utils.sendEmbed(message.channel, "Contact form submitted.", "00ff00")
 	end,
 	subcommands = {
 
@@ -54,6 +58,7 @@ return {
 						timestamp = discordia.Date():toISO('T', 'Z')
 					}
 				}})
+				utils.sendEmbed(message.channel, "Anonymous contact form submitted.", "00ff00")
 			end,
 			subcommands = {}
 		}

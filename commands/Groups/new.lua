@@ -8,6 +8,8 @@ return {
 	description = "Creates a new group, as well as a role and a voice channel for that group.",
 	usage = "<group name>",
 	visible = true,
+	botGuildPermissions = {"manageChannels", "manageRoles", "createInstantInvite", "addReactions"},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

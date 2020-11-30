@@ -8,9 +8,11 @@ return {
 	description = "Displays the bot's current prefix in this server.",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
-		utils.sendEmbed(message.channel, "The current command prefix is `"..guildSettings.prefix.."`.", "00ff00")
+		utils.sendEmbed(message.channel, "The current command prefix is `"..guildSettings.prefix.."`.", "00ff00", "To change the command prefix, use: "..guildSettings.prefix.."prefix set <new prefix>")
 	end,
 	onEnable = function(self, guildSettings, conn)
 		return true
@@ -24,6 +26,8 @@ return {
 			name = "prefix set",
 			description = "Sets the bot's prefix in this server.",
 			usage = "<new prefix>",
+			botGuildPermissions = {},
+			botChannelPermissions = {},
 			permissions = {"administrator"},
 			run = function(self, message, argString, args, guildSettings, conn)
 				if argString=="" then
@@ -47,6 +51,8 @@ return {
 			name = "prefix reset",
 			description = "Resets the bot's prefix in this server to the default.",
 			usage = "",
+			botGuildPermissions = {},
+			botChannelPermissions = {},
 			permissions = {"administrator"},
 			run = function(self, message, argString, args, guildSettings, conn)
 				if guildSettings.prefix==options.defaultPrefix then

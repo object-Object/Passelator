@@ -26,7 +26,11 @@ local converters = {
 				return c.name==message.content:lower()
 			end)
 		)
-		return channel and channel.type==enums.channelType.text and channel.id
+		if not channel or channel.type~=enums.channelType.text then return false end
+		if not message.guild:getMember(message.client.user):hasPermission(channel, "embedLinks") then
+			return false, "The bot is missing the `embedLinks` permission in the specified channel."
+		end
+		return channel.id
 	end,
 	duration = function(self, message)
 		local seconds = utils.secondsFromString(message.content)
@@ -112,7 +116,6 @@ local settings = {
 		name = "Give Back Group Roles on Server Rejoin",
 		validValues = "true, false",
 		column = "give_back_roles",
-		note = "This will not be done retroactively, i.e. users who left before this setting was changed will not have their roles given back when they rejoin.",
 		isBool = true,
 		getValue = function(self, menu, data)
 			return data.guildSettings[self.column] and "true" or "false"
@@ -147,11 +150,11 @@ for _,setting in ipairs(settings) do
 				return "Enter a new value for this setting.\n\n**Current value:** "..setting:getValue(menu, data).."\n**Valid values:** "..setting.validValues..(setting.note and "\n**Note:** "..setting.note or "")
 			end,
 			onPrompt = function(self, menu, data, message)
-				local newValue = setting:converter(message)
+				local newValue, err = setting:converter(message)
 				if not newValue then
 					return rm.Page{
 						title = "Settings: "..setting.name.." - Invalid value!",
-						description = "That value is not valid for this setting.",
+						description = "That value is not valid for this setting."..(err and "\n"..err or ""),
 						choices = {rm.Choice{
 							name = "Try again",
 							destination = self
@@ -208,6 +211,8 @@ return {
 	description = "Opens a reaction menu to view or edit bot settings in this server.",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {"addReactions", "manageMessages"},
 	permissions = {"administrator"},
 	run = function(self, message, argString, args, guildSettings, conn)
 		rm.send(message.channel, message.author, menu, {guildSettings=guildSettings, conn=conn})

@@ -7,6 +7,8 @@ return {
 	description = "Displays or sets a group's name.",
 	usage = "<group number> [new name]",
 	visible = true,
+	botGuildPermissions = {"manageChannels"},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

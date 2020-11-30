@@ -33,6 +33,8 @@ return {
 	description = "Runs arbitrary Lua code. May be enclosed in code block formatting.",
 	usage = " <code>",
 	visible = false,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {"bot.botOwner"},
 	run = function(self, message, argString, args, guildSettings)
 		if argString=="" then

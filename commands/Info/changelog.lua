@@ -53,6 +53,8 @@ return {
 	description = "Shows the bot's latest changelog entry.",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		sendChangelog(message.channel, guildSettings.prefix, true)

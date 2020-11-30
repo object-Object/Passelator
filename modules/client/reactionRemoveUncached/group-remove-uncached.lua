@@ -14,9 +14,5 @@ return {
 
 		local member = channel.guild:getMember(userId)
 		member:removeRole(row.role_id)
-
-		local role = channel.guild:getRole(row.role_id)
-		local groupMessage = channel:getMessage(messageId)
-		groupUtils.updateMembers(groupMessage, role, guildSettings)
 	end
 }

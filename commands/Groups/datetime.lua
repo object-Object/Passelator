@@ -7,6 +7,8 @@ return {
 	description = "Displays or sets a group's date/time.",
 	usage = "<group number> [new date/time]",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		if argString=="" then

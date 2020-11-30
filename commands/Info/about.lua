@@ -7,6 +7,8 @@ return {
 	description = "Shows information about the bot.",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		local changelog=fs.readFileSync("changelog.txt")
@@ -25,7 +27,7 @@ return {
 **5.** When your game is ready to start, ping the group's custom role, join its voice channel, and play some games!]]},
 					{name = "Servers", value = #message.client.guilds},
 					{name = "GitHub", value = "https://github.com/object-Object/Passelator"},
-					{name = "Invite link", value = "https://discord.com/api/oauth2/authorize?client_id=772674051076128789&permissions=268593232&scope=bot"},
+					{name = "Invite link", value = "https://discord.com/api/oauth2/authorize?client_id=772674051076128789&permissions="..tonumber(discordia.storage.requiredPermissions:toHex()).."&scope=bot"},
 					{name = "Contact", value = "Use the command `"..guildSettings.prefix.."contact`."},
 				},
 				footer = {

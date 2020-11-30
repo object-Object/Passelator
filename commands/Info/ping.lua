@@ -6,6 +6,8 @@ return {
 	description = "Shows the bot's ping (latency).",
 	usage = "",
 	visible = true,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		stopwatch:reset()

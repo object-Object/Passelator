@@ -32,6 +32,51 @@ local function updateSubcommands(command, baseCommand, conn, stmt)
 	end
 end
 
+local function sendPermissionError(channel, commandName, missingPermissions)
+	utils.sendEmbed(channel, "You may not use `"..commandName.."` because you are missing the following required permission"..utils.s(#missingPermissions)..": `"..table.concat(missingPermissions, "`, `").."`", "ff0000")
+end
+
+local function sendBotPermissionError(channel, commandName, missingGuildPermissions, missingChannelPermissions)
+	local embed={
+		description = "`"..commandName.."` cannot be used right now because the bot is missing certain required permissions.",
+		fields = {},
+		color = discordia.Color.fromHex("ff0000").value
+	}
+	if #missingGuildPermissions>0 then
+		table.insert(embed.fields, {name="Server-wide permissions", value="`"..table.concat(missingGuildPermissions, "`, `").."`"})
+	end
+	if #missingChannelPermissions>0 then
+		table.insert(embed.fields, {name="Channel-specific permissions", value="`"..table.concat(missingChannelPermissions, "`, `").."`"})
+	end
+	channel:send{embed=embed}
+end
+
+local function getMissingBotPermissions(guild, channel, guildPermissions, channelPermissions)
+	local missingGuildPermissions = {}
+	local missingChannelPermissions = {}
+	local botMember = guild:getMember(guild.client.user)
+	local botGuildPermissions = botMember:getPermissions()
+	local botChannelPermissions = botMember:getPermissions(channel)
+	for _,permission in pairs(guildPermissions) do
+		if not botGuildPermissions:has(permission) then
+			table.insert(missingGuildPermissions, permission)
+		end
+	end
+	for _,permission in pairs(channelPermissions) do
+		if not botChannelPermissions:has(permission) then
+			table.insert(missingChannelPermissions, permission)
+		end
+	end
+	return missingGuildPermissions, missingChannelPermissions
+end
+
+local function runStmtOnSubcommands(stmt, guild, command)
+	for _, subcommand in pairs(command.subcommands) do
+		stmt:reset():bind(guild.id, subcommand.name):step()
+		runStmtOnSubcommands(stmt, guild, subcommand)
+	end
+end
+
 local commandHandler = {}
 
 commandHandler.commands = {}				 -- keys: commandString, values: command table
@@ -50,6 +95,7 @@ commandHandler.customPermissions = {
 
 commandHandler.load = function(conn)
 	local stmt = conn:prepare("INSERT INTO commands (guild_id, command, is_enabled, permissions) VALUES (?, ?, ?, ?);")
+	local permissions = {}
 	for category, filetype in fs.scandirSync("commands") do
 		assert(filetype=="directory", "Non-directory file '"..category.."' in commands/ directory")
 		if not commandHandler.tree[category] then
@@ -61,13 +107,23 @@ commandHandler.load = function(conn)
 			if commandFilename:match("%.lua$") then
 				local command = require("../commands/"..category.."/"..commandFilename)
 				assert(type(command.subcommands)=="table", "Command "..category.."/"..command.name.." missing subcommands")
-				updateSubcommands(command, command, conn, stmt)
+				updateSubcommands(command, command, conn, stmt, permissions)
 				command.parentCommand = command
 				command.baseCommand = command
 				command.isSubcommand = false
 				command.category = category
 				commandHandler.commands[command.name] = command
 				commandHandler.tree[category][command.name] = command
+				for _, permission in pairs(command.botGuildPermissions) do
+					if not permissions[permission] then
+						permissions[permission] = true
+					end
+				end
+				for _, permission in pairs(command.botChannelPermissions) do
+					if not permissions[permission] then
+						permissions[permission] = true
+					end
+				end
 				table.insert(commandHandler.sortedCommandNames[category], command.name)
 				local guildIds = getGuildsMissingCommand(command, conn)
 				for _, guildId in pairs(guildIds) do
@@ -78,6 +134,11 @@ commandHandler.load = function(conn)
 	end
 	stmt:close()
 	table.sort(commandHandler.sortedCommandNames)
+	
+	local requiredPermissions = discordia.Permissions.fromMany(unpack(table.keys(permissions)))
+	requiredPermissions:enable("sendMessages", "readMessages", "embedLinks", "manageMessages")
+	discordia.storage.requiredPermissions = requiredPermissions:toArray()
+
 	for permission, _ in pairs(discordia.enums.permission) do
 		table.insert(commandHandler.sortedPermissionNames, permission)
 		commandHandler.validPermissions[permission] = true
@@ -173,17 +234,6 @@ commandHandler.sendCommandHelp = function(channel, guildSettings, command, conn)
 	end
 end
 
-commandHandler.sendPermissionError = function(channel, missingPermissions)
-	return utils.sendEmbed(channel, "You may not use this command because you are missing the following required permission"..utils.s(#missingPermissions)..": `"..table.concat(missingPermissions, "`, `").."`", "ff0000")
-end
-
-local function runStmtOnSubcommands(stmt, guild, command)
-	for _, subcommand in pairs(command.subcommands) do
-		stmt:reset():bind(guild.id, subcommand.name):step()
-		runStmtOnSubcommands(stmt, guild, subcommand)
-	end
-end
-
 commandHandler.enableCommand = function(guild, command, conn)
 	if command.isSubcommand then
 		if not commandHandler.getCommandSettings(guild, command.parentCommand, conn).is_enabled then
@@ -238,13 +288,14 @@ end
 
 commandHandler.getMissingPermissions = function(member, permissions)
 	local missingPermissions = {}
+	local memberPermissions = member:getPermissions()
 	for _,permission in pairs(permissions) do
 		if permission:match("^bot%.") then
 			if not commandHandler.customPermissions[permission:match("^bot%.(.+)")](member) then
 				table.insert(missingPermissions, permission)
 			end
 		else
-			if not member:hasPermission(permission) then
+			if not memberPermissions:has(permission) then
 				table.insert(missingPermissions, permission)
 			end
 		end
@@ -266,12 +317,24 @@ commandHandler.doCommands = function(message, guildSettings, conn)
 		end
 		local commandSettings = commandHandler.getCommandSettings(message.guild, command, conn)
 		if commandSettings.is_enabled then
-			local permissions = commandHandler.getPermissions(message.guild, command, conn)
-			local missingPermissions = commandHandler.getMissingPermissions(message.member, permissions)
-			if #missingPermissions==0 then
-				command:run(message, argString, args, guildSettings, conn)
+			local botMember = message.guild:getMember(message.client.user)
+			if not botMember:hasPermission(message.channel, "embedLinks") then
+				message:reply("**Error**\nThis bot requires the `embedLinks` permission for all commands. Please allow this permission for this bot in any channels you want to use this bot in.")
+			elseif guildSettings.delete_command_messages and not botMember:hasPermission(message.channel, "manageMessages") then
+				utils.sendEmbed(message.channel, "This bot requires the `manageMessages` permission for all commands. Please allow this permission for this bot server-wide and/or in any channels you want to use this bot in.", "ff0000")
 			else
-				commandHandler.sendPermissionError(message.channel, missingPermissions)
+				local missingBotGuildPerms, missingBotChannelPerms = getMissingBotPermissions(message.guild, message.channel, command.botGuildPermissions, command.botChannelPermissions)
+				if next(missingBotGuildPerms)~=nil or next(missingBotChannelPerms)~=nil then
+					sendBotPermissionError(message.channel, guildSettings.prefix..command.name, missingBotGuildPerms, missingBotChannelPerms)
+				else
+					local permissions = commandHandler.getPermissions(message.guild, command, conn)
+					local missingPermissions = commandHandler.getMissingPermissions(message.member, permissions)
+					if next(missingPermissions)~=nil then
+						sendPermissionError(message.channel, guildSettings.prefix..command.name, missingPermissions)
+					else
+						command:run(message, argString, args, guildSettings, conn)
+					end
+				end
 			end
 			if guildSettings.delete_command_messages then message:delete() end
 		end
