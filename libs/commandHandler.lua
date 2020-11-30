@@ -137,7 +137,7 @@ commandHandler.load = function(conn)
 	
 	local requiredPermissions = discordia.Permissions.fromMany(unpack(table.keys(permissions)))
 	requiredPermissions:enable("sendMessages", "readMessages", "embedLinks", "manageMessages")
-	discordia.storage.requiredPermissions = requiredPermissions:toArray()
+	discordia.storage.requiredPermissions = requiredPermissions
 
 	for permission, _ in pairs(discordia.enums.permission) do
 		table.insert(commandHandler.sortedPermissionNames, permission)

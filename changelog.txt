@@ -1,3 +1,7 @@
+**v1.3.1** - 2020-11-30
+* Fixed bug where `&prefix;about` didn't send
+* Updated text of `&prefix;about` slightly
+
 **v1.3.0** - 2020-11-30
 \*\* This update is aimed towards making the bot more usable, especially for server admins. It adds lots of configuration options, sanity checks, and general QoL improvements.
 + Added error messages to `&prefix;help [command]` for invalid commands
