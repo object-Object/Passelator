@@ -4,6 +4,8 @@ return {
 	usage = "",
 	visible = true,
 	isDefaultDisabled = nil,
+	botGuildPermissions = {},
+	botChannelPermissions = {},
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		
@@ -16,6 +18,8 @@ return {
 			name = "command subcommand",
 			description = "",
 			usage = "",
+			botGuildPermissions = {},
+			botChannelPermissions = {},
 			permissions = nil,
 			isDefaultDisabled = nil,
 			onEnable = nil,
