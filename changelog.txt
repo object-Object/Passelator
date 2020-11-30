@@ -1,17 +1,17 @@
-**v1.3.0** - DATE
+**v1.3.0** - 2020-11-30
 \*\* This update is aimed towards making the bot more usable, especially for server admins. It adds lots of configuration options, sanity checks, and general QoL improvements.
 + Added error messages to `&prefix;help [command]` for invalid commands
 + Added a timestamp to the cooldown footer for `&prefix;massping`
 + Added `&prefix;commands` to manage commands per-server
 + Added `&prefix;settings` to manage bot settings
 + Added `&prefix;add` and `&prefix;remove` to allow the group creator to add or remove users to their group (these are disabled by default)
-+ Added `&prefix;contact` to allow users to submit feedback, give suggestions, report bugs in the bot, or just send me nice messages, with the option to report anonymously using `&prefix;contact anonymous`
++ Added `&prefix;contact` to allow users to submit feedback, give suggestions, report bugs in the bot, or just send me nice messages, with the option to send anonymously using `&prefix;contact anonymous`
 + Added the following settings: `Can Add/Remove Users to Locked Groups`, `Can Leave Locked Groups`, `Delete Command Messages`, `Delete Group Messages on Group Delete`, `Give Back Group Roles on Server Rejoin`, `Mass Ping Cooldown Length`
 + Added error messages for when the bot is missing required permissions
 * The invite link in `&prefix;new` now automatically calculates the required permissions
 * `&prefix;new` and `&prefix;delete` now show a typing indicator while the group is being created or deleted
 * `&prefix;massping` is now disabled by default
-* The colour of group messages now changes to yellow when they are locked
+* The color of group messages now changes to yellow when they are locked
 * Group messages will now be updated when a user in a group leaves the server
 * When a user leaves and rejoins the server, their group roles will now be given back
 * Fixed bug where mass ping embeds were red even when the command succeeded
