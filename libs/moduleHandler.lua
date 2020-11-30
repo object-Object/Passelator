@@ -10,6 +10,7 @@ local moduleHandler = {}
 moduleHandler.modules = {}				-- table holding all modules with name as key and module table as value
 moduleHandler.tree = {}					-- table holding all modules, in a class.event.module hierarchy
 moduleHandler.sortedModuleNames = {}	-- table holding all modules as value, sorted alphabetically
+moduleHandler.emitter = discordia.Emitter()
 
 moduleHandler.load = function()
 	for class, classFiletype in fs.scandirSync("modules") do
@@ -34,37 +35,12 @@ moduleHandler.load = function()
 		end
 	end
 	table.sort(moduleHandler.sortedModuleNames)
-end
-
-moduleHandler.enable = function(modString, message, guildSettings, conn)
-	if not moduleHandler.modules[modString]:onEnable(message, guildSettings, conn) then
-		return false
-	end
-	guildSettings.disabled_modules[modString] = nil
-	local encodedSetting = json.encode(guildSettings.disabled_modules)
-	local stmt = conn:prepare("UPDATE guild_settings SET disabled_modules = ? WHERE guild_id = ?;")
-	stmt:reset():bind(encodedSetting, message.guild.id):step()
-	stmt:close()
-	return true
-end
-
-moduleHandler.disable = function(modString, message, guildSettings, conn)
-	if not moduleHandler.modules[modString]:onDisable(message, guildSettings, conn) then
-		return false
-	end
-	guildSettings.disabled_modules[modString] = true
-	local encodedSetting = json.encode(guildSettings.disabled_modules)
-	local stmt = conn:prepare("UPDATE guild_settings SET disabled_modules = ? WHERE guild_id = ?;")
-	stmt:reset():bind(encodedSetting, message.guild.id):step()
-	stmt:close()
-	return true
+	moduleHandler.emitter:emit("onLoad")
 end
 
 moduleHandler.doModules = function(event, guildSettings, ...)
 	for _, mod in pairs(event) do
-		if not guildSettings.disabled_modules[mod.name] then
-			mod:run(guildSettings, ...)
-		end
+		mod:run(guildSettings, ...)
 	end
 end
 

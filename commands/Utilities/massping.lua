@@ -6,6 +6,7 @@ return {
 	description = "Pings `@here`, with a built-in delay.",
 	usage = "",
 	visible = true,
+	isDefaultDisabled = true,
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		local row, _ = conn:exec("SELECT * FROM ping_cooldowns WHERE guild_id="..message.guild.id..";","k")
@@ -17,8 +18,9 @@ return {
 						description = "Mass pings are currently on cooldown. Try again later.",
 						color = discordia.Color.fromHex("ff0000").value,
 						footer = {
-							text = "Cooldown: "..utils.secondsToTime(row.end_timestamp - os.time())
-						}
+							text = "Cooldown: "..utils.secondsToTime(row.end_timestamp - os.time()).."  |  Cooldown will end:"
+						},
+						timestamp = discordia.Date.fromSeconds(row.end_timestamp):toISO("T", "Z")
 					}
 				}
 				return
@@ -35,10 +37,11 @@ return {
 			content = "@here",
 			embed = {
 				description = "Mass ping requested by "..utils.name(message.author)..".",
-				color = discordia.Color.fromHex("ff0000").value,
+				color = discordia.Color.fromHex("00ff00").value,
 				footer = {
-					text = "Cooldown: "..utils.secondsToTime(endTimestamp - os.time())
-				}
+					text = "Cooldown: "..utils.secondsToTime(endTimestamp - os.time()).."  |  Cooldown will end:"
+				},
+				timestamp = discordia.Date.fromSeconds(endTimestamp):toISO("T", "Z")
 			}
 		}
 	end,

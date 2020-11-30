@@ -6,16 +6,26 @@ print("Creating database...")
 conn:exec([[
 CREATE TABLE IF NOT EXISTS guild_settings (
 	guild_id TEXT PRIMARY KEY,
-	persistent_roles TEXT DEFAULT "{}",
-	disabled_commands TEXT DEFAULT "{}",
-	disabled_modules TEXT DEFAULT "{}",
-	command_permissions TEXT DEFAULT "{}",
-	prefix TEXT DEFAULT "]]..options.defaultPrefix..[[",
-	mass_ping_cooldown REAL DEFAULT ]]..options.defaultMassPingCooldown..[[,
+	prefix TEXT,
+	mass_ping_cooldown REAL,
 	delete_command_messages BOOLEAN DEFAULT 0 NOT NULL CHECK (delete_command_messages IN (0,1)),
+	delete_group_messages BOOLEAN DEFAULT 0 NOT NULL CHECK (delete_group_messages IN (0,1)),
+	can_add_remove_to_locked BOOLEAN DEFAULT 1 NOT NULL CHECK (can_add_remove_to_locked IN (0,1)),
+	can_leave_locked BOOLEAN DEFAULT 1 NOT NULL CHECK (can_leave_locked IN (0,1)),
+	give_back_roles BOOLEAN DEFAULT 1 NOT NULL CHECK (give_back_roles IN (0,1)),
 	group_category_id TEXT,
 	group_channel_id TEXT,
 	next_group_num REAL DEFAULT 1
+);
+]])
+conn:exec([[
+CREATE TABLE IF NOT EXISTS commands (
+	guild_id TEXT,
+	command TEXT,
+	is_enabled BOOLEAN DEFAULT 1 NOT NULL CHECK (is_enabled IN (0,1)),
+	permissions TEXT,
+	UNIQUE (guild_id, command),
+	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
 );
 ]])
 conn:exec([[
@@ -38,8 +48,19 @@ CREATE TABLE IF NOT EXISTS groups (
 	code TEXT,
 	date_time TEXT,
 	is_locked BOOLEAN DEFAULT 0 NOT NULL CHECK (is_locked IN (0,1)),
-	PRIMARY KEY (group_num, guild_id),
+	UNIQUE (group_num, guild_id),
+	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
+);
+]])
+conn:exec([[
+CREATE TABLE IF NOT EXISTS user_roles (
+	guild_id TEXT,
+	user_id TEXT,
+	role_id TEXT,
+	user_in_guild BOOLEAN DEFAULT 1 NOT NULL CHECK (user_in_guild IN (0,1)),
+	UNIQUE (guild_id, user_id, role_id),
 	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
 );
 ]])
 print("Done.")
+return conn

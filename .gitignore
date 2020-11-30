@@ -9,3 +9,4 @@ gateway.json
 *.so
 *.db
 options.lua
+libs/discordia-reaction-menu.lua

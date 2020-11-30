@@ -3,22 +3,23 @@ return {
 	description = "",
 	usage = "",
 	visible = true,
+	isDefaultDisabled = nil,
 	permissions = {},
 	run = function(self, message, argString, args, guildSettings, conn)
 		
 	end,
-	onEnable = function(self, message, guildSettings)
-		return true
-	end,
-	onDisable = function(self, message, guildSettings)
-		return true
-	end,
+	onEnable = nil,
+	onDisable = nil,
 	subcommands = {
 
 		subcommand = {
 			name = "command subcommand",
 			description = "",
 			usage = "",
+			permissions = nil,
+			isDefaultDisabled = nil,
+			onEnable = nil,
+			onDisable = nil,
 			run = function(self, message, argString, args, guildSettings, conn)
 				
 			end,

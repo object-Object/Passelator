@@ -17,15 +17,17 @@ return {
 
 		local category = message.guild:getChannel(guildSettings.group_category_id)
 		if not category then
-			utils.sendEmbed(message.channel, "**Error: group category is not set.** Please ask the server admins to set the group category setting (`"..guildSettings.prefix.."groupcategory`) before using this command.", "ff0000")
+			utils.sendEmbed(message.channel, "**Error: group category is not set.** Please ask the server admins to set the Group Category setting (`"..guildSettings.prefix.."settings`) before using this command.", "ff0000")
 			return
 		end
 
 		local groupChannel = message.guild:getChannel(guildSettings.group_channel_id)
 		if not groupChannel then
-			utils.sendEmbed(message.channel, "**Error: group channel is not set.** Please ask the server admins to set the group channel setting (`"..guildSettings.prefix.."groupchannel`) before using this command.", "ff0000")
+			utils.sendEmbed(message.channel, "**Error: group channel is not set.** Please ask the server admins to set the Group Channel setting (`"..guildSettings.prefix.."settings`) before using this command.", "ff0000")
 			return
 		end
+
+		message.channel:broadcastTyping()
 
 		local groupNum = guildSettings.next_group_num
 
@@ -44,7 +46,7 @@ return {
 		local dateTime = "N/A"
 
 		local groupMessage = groupChannel:send{
-			embed = groupUtils.getGroupEmbed(message.author, groupNum, argString, role, voiceChannel, vcInviteLink, code, false, dateTime)
+			embed = groupUtils.getGroupEmbed(message.author, groupNum, argString, role, voiceChannel, vcInviteLink, code, false, dateTime, guildSettings)
 		}
 		groupMessage:addReaction("✅")
 

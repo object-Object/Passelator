@@ -24,13 +24,19 @@ return {
 		end
 
 		if message.author.id==row.creator_id then
+			message.channel:broadcastTyping()
+			
 			message.guild:getRole(row.role_id):delete()
 
 			message.guild:getChannel(row.voice_channel_id):delete()
 
 			local groupMessage = message.guild:getChannel(guildSettings.group_channel_id):getMessage(row.message_id)
-			groupMessage:setEmbed(groupUtils.getDeletedGroupEmbed(message.author, row.group_num, row.name))
-			groupMessage:clearReactions()
+			if guildSettings.delete_group_messages then
+				groupMessage:delete()
+			else
+				groupMessage:setEmbed(groupUtils.getDeletedGroupEmbed(message.author, row.group_num, row.name))
+				groupMessage:clearReactions()
+			end
 
 			local stmt2 = conn:prepare("DELETE FROM groups WHERE guild_id = ? AND group_num = ?;")
 			stmt2:reset():bind(row.guild_id, row.group_num):step()

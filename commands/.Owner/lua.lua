@@ -40,7 +40,7 @@ return {
 			return
 		end
 
-		argString = argString:gsub("```(lua)?\n?", "")
+		argString = argString:gsub("```lua", ""):gsub("```", "")
 
 		local lines = {}
 		local iolines = {}

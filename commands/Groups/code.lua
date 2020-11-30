@@ -16,7 +16,7 @@ return {
 		end
 
 		local groupNum = args[1]:gsub("#", "")
-		local stmt = conn:prepare("SELECT * FROM groups WHERE guild_id = ? AND group_num = ?;")
+		local stmt = conn:prepare("SELECT creator_id, code, message_id FROM groups WHERE guild_id = ? AND group_num = ?;")
 		local row = utils.formatRow(stmt:reset():bind(message.guild.id, groupNum):resultset("k"))
 		stmt:close()
 		if not row then
@@ -30,14 +30,14 @@ return {
 		local promptMessage
 		if #args==1 then
 			-- display code
-			utils.sendEmbed(message.channel, "Game code/link for Group #"..row.group_num..": **"..row.code.."**", "00ff00")
+			utils.sendEmbed(message.channel, "Game code/link for Group #"..groupNum..": **"..row.code.."**", "00ff00")
 			return
 		elseif message.author~=creator then
 			-- not the creator, ask creator to confirm/deny
 			promptMessage = message:reply{
 				content = creator.mentionString,
 				embed = {
-					description = "Only the group's creator may set the game code/link.\n"..creator.mentionString..", react :white_check_mark: to confirm, or :x: to deny, setting the game code/link for Group #"..row.group_num.." to the following code: **"..newCode.."**",
+					description = "Only the group's creator may set the game code/link.\n"..creator.mentionString..", react :white_check_mark: to confirm, or :x: to deny, setting the game code/link for Group #"..groupNum.." to the following code: **"..newCode.."**",
 					color = discordia.Color.fromHex("00ff00").value,
 					footer = {
 						text = "This message will expire in 15 minutes."
@@ -77,24 +77,22 @@ return {
 		end
 
 		local stmt2 = conn:prepare("UPDATE groups SET code = ? WHERE guild_id = ? AND group_num = ?;")
-		stmt2:reset():bind(newCode, row.guild_id, row.group_num):step()
+		stmt2:reset():bind(newCode, message.guild.id, groupNum):step()
 		stmt2:close()
 
-		local role = message.guild:getRole(row.role_id)
-		local voiceChannel = message.guild:getChannel(row.voice_channel_id)
 		local groupChannel = message.guild:getChannel(guildSettings.group_channel_id)
 		local groupMessage = groupChannel:getMessage(row.message_id)
 
-		groupMessage:setEmbed(groupUtils.getGroupEmbed(creator, row.group_num, row.name, role, voiceChannel, row.voice_channel_invite, newCode, row.is_locked, row.date_time))
+		groupUtils.updateCode(groupMessage, newCode)
 
 		if promptMessage then
 			promptMessage:clearReactions()
 			promptMessage:setEmbed{
-				description = "The game code/link for Group #"..row.group_num.." is now: **"..newCode.."**",
+				description = "The game code/link for Group #"..groupNum.." is now: **"..newCode.."**",
 				color = discordia.Color.fromHex("00ff00").value
 			}
 		else
-			utils.sendEmbed(message.channel, "The game code/link for Group #"..row.group_num.." is now: **"..newCode.."**", "00ff00")
+			utils.sendEmbed(message.channel, "The game code/link for Group #"..groupNum.." is now: **"..newCode.."**", "00ff00")
 		end
 	end,
 	onEnable = function(self, message, guildSettings)

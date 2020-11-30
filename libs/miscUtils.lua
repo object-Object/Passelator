@@ -22,14 +22,17 @@ utils.createLookupTable = function(input)
 end
 
 local jsonColumns=utils.createLookupTable{
-	"disabled_commands",
-	"disabled_modules",
-	"persistent_roles",
-	"command_permissions"
+	"permissions",
 }
 local booleanColumns=utils.createLookupTable{
 	"delete_command_messages",
-	"is_locked"
+	"delete_group_messages",
+	"can_add_remove_to_locked",
+	"can_leave_locked",
+	"give_back_roles",
+	"is_locked",
+	"is_enabled",
+	"user_in_guild",
 }
 
 utils.divmod = function(a, b)
@@ -76,11 +79,6 @@ utils.formatRow = function(row)
 	return row
 end
 
-utils.getGuildSettings = function(id, conn)
-	local settings,_ = conn:exec("SELECT * FROM guild_settings WHERE guild_id="..id..";","k")
-	return utils.formatRow(settings)
-end
-
 utils.sendEmbed = function(channel, text, color, footer_text, footer_icon, messageContent)
 	local colorValue=color and discordia.Color.fromHex(color).value or nil
 	local msg=channel:send{
@@ -103,7 +101,7 @@ utils.sendEmbedSafe = function(channel, text, color, footer_text, footer_icon, m
 end
 
 utils.logError = function(guild, err)
-	guild.client._api:executeWebhook("772712556271239188", "sEUwA9w2UZvfwOlF-cqx7TN_M0OHsssMEuIrAjb6HlS40hPnlMXQLvv_qXAgkIrkx0bo", {
+	guild.client._api:executeWebhook(options.errorWebhook.id, options.errorWebhook.token, {
 		embeds = {{
 			title = "Bot crashed!",
 			description = "```\n"..err.."```",

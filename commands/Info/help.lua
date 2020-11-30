@@ -10,7 +10,7 @@ local function appendSubcommands(str, indent, command)
 	return str
 end
 
-local function showMainHelp(message, guildSettings, showSubcommands)
+local function showMainHelp(message, guildSettings, conn, showSubcommands)
 	local fields = {}
 	for _, categoryString in ipairs(commandHandler.sortedCategoryNames) do
 		local category = commandHandler.sortedCommandNames[categoryString]
@@ -18,7 +18,8 @@ local function showMainHelp(message, guildSettings, showSubcommands)
 			local output = "```\n"
 			for _, commandString in ipairs(category) do
 				local command = commandHandler.commands[commandString]
-				if command.visible and not guildSettings.disabled_commands[commandString] then
+				local commandSettings = commandHandler.getCommandSettings(message.guild, command, conn)
+				if command.visible and commandSettings.is_enabled then
 					output = output..guildSettings.prefix..commandString.."\n"
 					if showSubcommands then
 						output = appendSubcommands(output, "  ", command)
@@ -34,6 +35,7 @@ local function showMainHelp(message, guildSettings, showSubcommands)
 	message.channel:send{
 		embed = {
 			title = (showSubcommands and "Help menu + subcommands" or "Help menu"),
+			description = "Looking for information about the bot? Use `"..guildSettings.prefix.."about` instead.",
 			fields = fields,
 			color = discordia.Color.fromHex("00ff00").value,
 			footer = {
@@ -52,17 +54,21 @@ return {
 	run = function(self, message, argString, args, guildSettings, conn) -- function called when the command is used
 		if argString=="" then
 			-- show normal help menu
-			showMainHelp(message, guildSettings, false)
+			showMainHelp(message, guildSettings, conn, false)
 		else
 			-- show command-specific help
 			local baseCommandString = commandHandler.stripPrefix(args[1], guildSettings, message.client)
 			local command = commandHandler.commands[baseCommandString]
 			if command and command.visible then
-				command = commandHandler.subcommandFromString(command, args)
-				commandHandler.sendCommandHelp(message.channel, guildSettings, command)
+				command, extra = commandHandler.subcommandFromString(command, args)
+				if extra~="" then
+					utils.sendEmbed(message.channel, "Subcommand `"..extra.."` not found for command `"..guildSettings.prefix..command.name.."`.", "ff0000")
+				else
+					commandHandler.sendCommandHelp(message.channel, guildSettings, command, conn)
+				end
 			else
 				-- command not found
-				showMainHelp(message, guildSettings, false)
+				utils.sendEmbed(message.channel, "Command `"..guildSettings.prefix..baseCommandString.."` not found.", "ff0000")
 			end
 		end
 	end,
@@ -79,7 +85,7 @@ return {
 			description = "Shows a list of commands with subcommands below.",
 			usage = "",
 			run = function(self, message, argString, args, guildSettings, conn)
-				showMainHelp(message, guildSettings, true)
+				showMainHelp(message, guildSettings, conn, true)
 			end,
 			subcommands = {}
 		}

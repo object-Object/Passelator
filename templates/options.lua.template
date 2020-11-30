@@ -5,4 +5,12 @@ return {
 	},
 	defaultPrefix = "p.", -- default command prefix, used in database creation
 	defaultMassPingCooldown = "10800", -- default mass ping cooldown in seconds, used in database creation
+	errorWebhook = { -- credentials for error message webhook
+		id = "",
+		token = ""
+	},
+	contactWebhook = { -- credentials for contact webhook
+		id = "",
+		token = ""
+	},
 }
