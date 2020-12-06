@@ -8,7 +8,7 @@
 * [discordia-reaction-menu](https://github.com/object-Object/discordia-reaction-menu)
 
 ## Installation
-I'd prefer if you would just invite my bot to your server using the invite link (this repo's website). However, if you want to run your own version, here's how.
+I'd prefer if you would just invite my bot to your server using [the invite link](https://discord.com/api/oauth2/authorize?client_id=772674051076128789&permissions=268594257&scope=bot). However, if you want to run your own version, here's how.
 * Download Passelator.
 * Install the dependencies.
 * Create the `options.lua` file in the bot's main directory, using the template in `templates/`.
