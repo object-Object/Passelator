@@ -34,9 +34,11 @@ WHERE user_roles.user_id = ']]..member.id..[[' AND groups.guild_id = ']]..member
 				local roleId = rows.role_id[row]
 				if not member:hasRole(roleId) then
 					deleteStmt:reset():bind(roleId):step()
-					local groupMessage = groupChannel:getMessage(rows.message_id[row])
 					local role = member.guild:getRole(roleId)
-					groupUtils.updateMembers(groupMessage, role, guildSettings)
+					if role then
+						local groupMessage = groupChannel:getMessage(rows.message_id[row])
+						groupUtils.updateMembers(groupMessage, role, guildSettings)
+					end
 				end
 				rolesLookup[roleId] = true
 			end
