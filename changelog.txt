@@ -8,6 +8,7 @@
 * Changed the format of changelogs (again). As before, this was not done retroactively.
 * Deletion of group channel or category is now properly handled.
 * Fixed some backend bugs (not visible to users, but things may run a bit faster now).
+* Updated the look and feel of `&prefix;about`.
 * When a group message, voice channel, or role is deleted, it will now be re-created automatically.
 
 **v1.3.2** - 2020-11-30
