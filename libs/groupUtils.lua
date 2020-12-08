@@ -39,12 +39,14 @@ local function getMembersField(role, guildSettings)
 	end
 	table.sort(membersTable, function(a, b) return a.name<b.name end)
 	local members = ""
+	local memberCount = 0
 	for _, m in ipairs(membersTable) do
 		members = members..utils.name(m)..(m.guild and "" or " :door:").."\n"
+		memberCount = memberCount + 1
 	end
 	members = members~="" and members or "N/A"
 
-	return {name = "Members", value = members, inline = false}
+	return {name = "Members ("..memberCount..")", value = members, inline = false}
 end
 
 local function getColorField(isLocked)
