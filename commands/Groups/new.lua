@@ -22,7 +22,7 @@ return {
 			utils.sendEmbed(message.channel, "**Error: group category is not set.** Please ask the server admins to set the Group Category setting (`"..guildSettings.prefix.."settings`) before using this command.", "ff0000")
 			return
 		end
-		local _, missingPermissions = commandHandler.getMissingBotPermissions(message.guild, category, {}, {"manageChannels"})
+		local _, missingPermissions = commandHandler.getMissingBotPermissions(message.guild, category, {}, {"manageChannels", "manageRoles"})
 		if next(missingPermissions)~=nil then
 			commandHandler.sendBotPermissionErrorForChannel(message.channel, guildSettings.prefix..self.name, category, missingPermissions)
 			return
