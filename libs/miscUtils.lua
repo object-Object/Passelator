@@ -5,6 +5,18 @@ local options = discordia.storage.options
 
 local utils = {}
 
+-- custom string.format function that handles the parameter field (https://en.wikipedia.org/wiki/Printf_format_string#Parameter_field)
+utils.f = function(str, ...)
+	local args, order = {...}, {}
+
+	str = str:gsub("%%(%d+)%$", function(i)
+		table.insert(order, args[tonumber(i)])
+		return "%"
+	end)
+
+	return str:format(table.unpack(order))
+end
+
 utils.s = function(n)
 	return n==1 and "" or "s"
 end
@@ -100,11 +112,11 @@ utils.sendEmbedSafe = function(channel, text, color, footer_text, footer_icon, m
 	return utils.sendEmbed(channel, text, color, footer_text, footer_icon, messageContent)
 end
 
-utils.logError = function(guild, err)
+utils.logError = function(guild, err, command)
 	guild.client._api:executeWebhook(options.errorWebhook.id, options.errorWebhook.token, {
 		embeds = {{
 			title = "Bot crashed!",
-			description = "```\n"..err.."```",
+			description = (command and "Command: `"..command.."` " or "").."```\n"..err.."```",
 			color = discordia.Color.fromHex("ff0000").value,
 			timestamp = discordia.Date():toISO('T', 'Z'),
 			footer = {

@@ -74,7 +74,7 @@ return {
 		local fn, syntaxError = load(argString, "DiscordBot", "t", sandbox)
 		if not fn then return message:reply(code(syntaxError)) end
 
-		local success, runtimeError = pcall(fn)
+		local success, runtimeError = xpcall(fn, debug.traceback)
 		if not success then return message:reply(code(runtimeError)) end
 
 		lines = table.concat(lines, "\n")

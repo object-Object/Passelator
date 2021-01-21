@@ -321,6 +321,9 @@ commandHandler.doCommands = function(message, guildSettings, conn)
 		end
 		local commandSettings = commandHandler.getCommandSettings(message.guild, command, conn)
 		if commandSettings.is_enabled then
+			if guildSettings.delete_command_messages then
+				message:delete()
+			end
 			local botMember = message.guild:getMember(message.client.user)
 			if not botMember:hasPermission(message.channel, "embedLinks") then
 				message:reply("**Error**\nThis bot requires the `embedLinks` permission for all commands. Please allow this permission for this bot in any channels you want to use this bot in.")
@@ -336,11 +339,15 @@ commandHandler.doCommands = function(message, guildSettings, conn)
 					if next(missingPermissions)~=nil then
 						sendPermissionError(message.channel, guildSettings.prefix..command.name, missingPermissions)
 					else
-						command:run(message, argString, args, guildSettings, conn)
+						local success, err = xpcall(command.run, debug.traceback, command, message, argString, args, guildSettings, conn)
+						if not success then
+							utils.sendEmbed(message.channel, "The bot has encountered an unexpected error. Your command likely did not finish running. This issue has been reported, but if possible, please contact the bot developer using `"..guildSettings.prefix.."contact` to provide more information about what you were doing when this issue occurred.", "ff0000")
+							utils.logError(message.guild, err, message.content)
+							print("Bot crashed! Guild: "..message.guild.name.." ("..message.guild.id..")\nCommand: "..message.content.."\n"..err)
+						end
 					end
 				end
 			end
-			if guildSettings.delete_command_messages then message:delete() end
 		end
 	end
 end

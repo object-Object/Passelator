@@ -1,10 +1,18 @@
 local discordia = require("discordia")
 local options = require("options")
 discordia.storage.options = options
+local limits = require("limits")
+discordia.storage.limits = limits
 local sql = require("sqlite3")
 local fs = require("fs")
 local json = require("json")
+local http = require("coro-http")
 local utils = require("miscUtils")
+
+-- stops async from doing things out of order when a user joins
+discordia.storage.addingRolesOnJoin = {} -- key: member.guild.id.."-"..member.id
+-- used to tell the memberUpdate handler to set is_from_link = 1
+discordia.storage.isFromLink = {} -- key: role.id.."-"..member.guild.id.."-"..member.id
 
 local conn
 if not fs.existsSync("bot.db") then
@@ -16,6 +24,7 @@ discordia.storage.conn = conn
 
 local client = discordia.Client(options.clientOptions)
 local clock = discordia.Clock()
+local emitter = discordia.Emitter()
 discordia.extensions()
 
 local commandHandler = require("commandHandler")
@@ -24,12 +33,38 @@ local moduleHandler = require("moduleHandler")
 moduleHandler.load()
 
 local statusVersion
+local botListGuildCount
 local function setGame()
 	local changelog = fs.readFileSync("changelog.txt")
 	local version = changelog and changelog:match("%*%*([^%*]+)%*%*") or "error"
 	if version ~= statusVersion then
 		statusVersion = version
 		client:setGame({name=options.defaultPrefix.."help | "..version, url="https://www.twitch.tv/ThisIsAFakeTwitchLink"})
+	end
+	if options.isProduction and botListGuildCount ~= #client.guilds then
+		botListGuildCount = #client.guilds
+		do -- top.gg
+			local headers = {
+				{"content-type", "application/json"},
+				{"Authorization", options.botLists.topgg.token}
+			}
+			local payload = json.encode{
+				server_count = botListGuildCount
+			}
+			local _, response = http.request("POST", options.botLists.topgg.url, headers, payload)
+			print("Updating top.gg server count. Response: "..response)
+		end
+		do -- Discord Bot List
+			local headers = {
+				{"content-type", "application/json"},
+				{"Authorization", options.botLists.discordbotlist.token}
+			}
+			local payload = json.encode{
+				guilds = botListGuildCount
+			}
+			local _, response = http.request("POST", options.botLists.discordbotlist.url, headers, payload)
+			print("Updating Discord Bot List server count. Response: "..response)
+		end
 	end
 end
 
@@ -53,11 +88,11 @@ local function getGuildSettings(id, conn)
 	return utils.formatRow(settings)
 end
 
-local function doModulesPcall(event, guild, conn, ...)
-	local success, err = pcall(function(...)
+local function doModules(event, guild, conn, ...)
+	local success, err = xpcall(function(...)
 		local guildSettings = getGuildSettings(guild.id, conn)
 		moduleHandler.doModules(event, guildSettings, ...)
-	end, ...)
+	end, debug.traceback, ...)
 	if not success then
 		utils.logError(guild, err)
 		print("Bot crashed! Guild: "..guild.name.." ("..guild.id..")\n"..err)
@@ -66,14 +101,14 @@ end
 
 clock:on("min", function()
 	for guild in client.guilds:iter() do
-		doModulesPcall(moduleHandler.tree.clock.min, guild, conn, guild, conn)
+		doModules(moduleHandler.tree.clock.min, guild, conn, guild, conn)
 	end
 end)
 
 clock:on("hour", function()
 	setGame()
 	for guild in client.guilds:iter() do
-		doModulesPcall(moduleHandler.tree.clock.hour, guild, conn, guild, conn)
+		doModules(moduleHandler.tree.clock.hour, guild, conn, guild, conn)
 	end
 end)
 
@@ -86,45 +121,51 @@ client:on("guildCreate", function(guild)
 end)
 
 client:on("memberJoin", function(member)
-	doModulesPcall(moduleHandler.tree.client.memberJoin, member.guild, conn, member, conn)
+	doModules(moduleHandler.tree.client.memberJoin, member.guild, conn, member, conn)
 end)
 
 client:on("memberUpdate", function(member)
-	doModulesPcall(moduleHandler.tree.client.memberUpdate, member.guild, conn, member, conn)
+	doModules(moduleHandler.tree.client.memberUpdate, member.guild, conn, member, conn)
 end)
 
 client:on("memberLeave", function(member)
-	doModulesPcall(moduleHandler.tree.client.memberLeave, member.guild, conn, member, conn)
+	doModules(moduleHandler.tree.client.memberLeave, member.guild, conn, member, conn)
+	emitter:emit("collectgarbage")
+end)
+
+emitter:on("collectgarbage", function()
+	timer.sleep(100)
+	collectgarbage()
 end)
 
 --[[
 client:on("userBan", function(user, guild)
-	doModulesPcall(moduleHandler.tree.client.userBan, guild, conn, user, guild, conn)
+	doModules(moduleHandler.tree.client.userBan, guild, conn, user, guild, conn)
 end)
 ]]
 
 client:on("reactionAdd", function(reaction, userId)
 	if not reaction.message.guild then return end
-	doModulesPcall(moduleHandler.tree.client.reactionAdd, reaction.message.guild, conn, reaction, userId, conn)
+	doModules(moduleHandler.tree.client.reactionAdd, reaction.message.guild, conn, reaction, userId, conn)
 end)
 
 client:on("reactionAddUncached", function(channel, messageId, hash, userId)
 	if not channel.guild then return end
-	doModulesPcall(moduleHandler.tree.client.reactionAddUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
+	doModules(moduleHandler.tree.client.reactionAddUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
 end)
 
 client:on("reactionRemove", function(reaction, userId)
 	if not reaction.message.guild then return end
-	doModulesPcall(moduleHandler.tree.client.reactionRemove, reaction.message.guild, conn, reaction, userId, conn)
+	doModules(moduleHandler.tree.client.reactionRemove, reaction.message.guild, conn, reaction, userId, conn)
 end)
 
 client:on("reactionRemoveUncached", function(channel, messageId, hash, userId)
 	if not channel.guild then return end
-	doModulesPcall(moduleHandler.tree.client.reactionRemoveUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
+	doModules(moduleHandler.tree.client.reactionRemoveUncached, channel.guild, conn, channel, messageId, hash, userId, conn)
 end)
 
 client:on("messageCreate", function(message)
-	local success, err = pcall(function()
+	local success, err = xpcall(function()
 		if message.author.bot
 			or message.channel.type == discordia.enums.channelType.private
 			or not message.guild then return end
@@ -133,7 +174,7 @@ client:on("messageCreate", function(message)
 		moduleHandler.doModules(moduleHandler.tree.client.messageCreate, guildSettings, message, conn)
 
 		commandHandler.doCommands(message, guildSettings, conn)
-	end)
+	end, debug.traceback)
 	if not success then
 		utils.logError(message.guild, err)
 		print("Bot crashed! Guild: "..message.guild.name.." ("..message.guild.id..")\n"..err)
@@ -143,12 +184,12 @@ end)
 --[[
 client:on("messageUpdate", function(message)
 	if not message.guild then return end
-	doModulesPcall(moduleHandler.tree.client.messageUpdate, message.guild, conn, message, conn)
+	doModules(moduleHandler.tree.client.messageUpdate, message.guild, conn, message, conn)
 end)
 
 client:on("messageDelete", function(message)
 	if not message.guild then return end
-	doModulesPcall(moduleHandler.tree.client.messageDelete, message.guild, conn, message, conn)
+	doModules(moduleHandler.tree.client.messageDelete, message.guild, conn, message, conn)
 end)
 ]]
 

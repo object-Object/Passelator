@@ -1,6 +1,8 @@
 local commandHandler = require("commandHandler")
 local utils = require("miscUtils")
 local groupUtils = require("groupUtils")
+local discordia = require("discordia")
+local limits = discordia.storage.limits
 
 return {
 	name = "datetime",
@@ -33,6 +35,9 @@ return {
 			return
 		elseif message.author.id~=row.creator_id then
 			utils.sendEmbed(message.channel, "Only the group's creator may set its date/time.", "ff0000")
+			return
+		elseif #newDateTime>limits.groupDateTimeLength then
+			utils.sendEmbed(message.channel, "Date/time cannot be longer than "..limits.groupDateTimeLength.." characters.", "ff0000")
 			return
 		end
 

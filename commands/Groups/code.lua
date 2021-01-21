@@ -2,11 +2,12 @@ local commandHandler = require("commandHandler")
 local utils = require("miscUtils")
 local groupUtils = require("groupUtils")
 local discordia = require("discordia")
+local limits = discordia.storage.limits
 
 return {
 	name = "code",
-	description = "Displays or sets the game code/link for a group.",
-	usage = "<group number> [new game code/link]",
+	description = "Displays or sets the game code for a group.",
+	usage = "<group number> [new game code]",
 	visible = true,
 	botGuildPermissions = {},
 	botChannelPermissions = {"addReactions", "manageMessages"},
@@ -32,14 +33,17 @@ return {
 		local promptMessage
 		if #args==1 then
 			-- display code
-			utils.sendEmbed(message.channel, "Game code/link for Group #"..groupNum..": **"..row.code.."**", "00ff00")
+			utils.sendEmbed(message.channel, "Game code for Group #"..groupNum..": **"..row.code.."**", "00ff00")
+			return
+		elseif #newCode>limits.groupCodeLength then
+			utils.sendEmbed(message.channel, "Game code cannot be longer than "..limits.groupCodeLength.." characters.", "ff0000")
 			return
 		elseif message.author~=creator then
 			-- not the creator, ask creator to confirm/deny
 			promptMessage = message:reply{
 				content = creator.mentionString,
 				embed = {
-					description = "Only the group's creator may set the game code/link.\n"..creator.mentionString..", react :white_check_mark: to confirm, or :x: to deny, setting the game code/link for Group #"..groupNum.." to the following code: **"..newCode.."**",
+					description = "Only the group's creator may set the game code.\n"..creator.mentionString..", react :white_check_mark: to confirm, or :x: to deny, setting the game code for Group #"..groupNum.." to the following code: **"..newCode.."**",
 					color = discordia.Color.fromHex("00ff00").value,
 					footer = {
 						text = "This message will expire in 15 minutes."
@@ -57,7 +61,7 @@ return {
 			if not success then
 				promptMessage:clearReactions()
 				promptMessage:setEmbed{
-					description = "Only the group's creator may set the game code/link.\nMessage expired.",
+					description = "Only the group's creator may set the game code.\nMessage expired.",
 					color = discordia.Color.fromHex("ff0000").value
 				}
 				return
@@ -65,12 +69,12 @@ return {
 				promptMessage:clearReactions()
 				if userId==creator.id then
 					promptMessage:setEmbed{
-						description = "Only the group's creator may set the game code/link.\nGroup creator denied setting this code.",
+						description = "Only the group's creator may set the game code.\nGroup creator denied setting this code.",
 						color = discordia.Color.fromHex("ff0000").value
 					}
 				else
 					promptMessage:setEmbed{
-						description = "Only the group's creator may set the game code/link.\nUser cancelled setting this code.",
+						description = "Only the group's creator may set the game code.\nUser cancelled setting this code.",
 						color = discordia.Color.fromHex("ff0000").value
 					}
 				end
@@ -90,11 +94,11 @@ return {
 		if promptMessage then
 			promptMessage:clearReactions()
 			promptMessage:setEmbed{
-				description = "The game code/link for Group #"..groupNum.." is now: **"..newCode.."**",
+				description = "The game code for Group #"..groupNum.." is now: **"..newCode.."**",
 				color = discordia.Color.fromHex("00ff00").value
 			}
 		else
-			utils.sendEmbed(message.channel, "The game code/link for Group #"..groupNum.." is now: **"..newCode.."**", "00ff00")
+			utils.sendEmbed(message.channel, "The game code for Group #"..groupNum.." is now: **"..newCode.."**", "00ff00")
 		end
 	end,
 	onEnable = function(self, message, guildSettings)

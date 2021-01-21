@@ -1,17 +1,21 @@
 **v1.4.0** - DATE HERE
 + Added a member count to group messages.
++ Added error messages for when commands encounter unexpected errors.
 + Added integration with top.gg and Discord Bot List (server count will now appear on the bot pages).
++ Added limits to the length of group names, codes, and date/times, a maximum group number (about 9.9 million, so it should never actually be reached), and the amount of displayed members in a group. These can be viewed using `&prefix;limits`.
 + Added links to vote for Passelator to the `&prefix;about` command.
 + Added `&prefix;link` to link two groups together, making all members of one group show up in the other and vice versa. Works between servers! Also added `&prefix;unlink` to unlink two groups.
-+ Added some text to group messages to explain what the :door: and :link: emotes mean. :door: is used when a user is in a group but is not in the server, and :link: is used when a user is in a group because they joined the linked group.
-+ Added the ability to enable or disable commands by channel.
-+ Added the `Send Message for Disabled Commands` setting.
-* Changed the format of changelogs (again). As before, this was not done retroactively.
-* Deletion of group channel or category is now properly handled.
++ Added some text to group messages to explain what the :door: and :link: emotes mean, but only if they are used in that group message.
+* Slightly changed the formatting of changelogs (again). As before, this was not done retroactively.
+* Deletion of the group channel or category is now properly handled.
 * Fixed a bug where the bot would sometimes silently fail to set voice channel permissions during `&prefix;new`.
 * Fixed some backend bugs (not visible to users).
+* If the `Delete Command Messages` setting is enabled, command messages will now be deleted before the command runs, not after.
+* Moved `&prefix;ping` to the Utilities category in the help menu, from Info.
+* Renamed "Game Code/Link" to "Game Code" to avoid confusion with group linking.
 * Updated the look and feel of `&prefix;about`.
 * When a group message, voice channel, or role is deleted, it will now be re-created automatically.
+* When the group channel is changed, group messages are now moved to the new channel.
 
 **v1.3.2** - 2020-11-30
 + Added more permission checks to `&prefix;new`

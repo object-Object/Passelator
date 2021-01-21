@@ -2,6 +2,7 @@ local commandHandler = require("commandHandler")
 local utils = require("miscUtils")
 local groupUtils = require("groupUtils")
 local discordia = require("discordia")
+local limits = discordia.storage.limits
 
 return {
 	name = "new",
@@ -17,12 +18,14 @@ return {
 			return
 		end
 
+		message.channel:broadcastTyping()
+
 		local category = message.guild:getChannel(guildSettings.group_category_id)
 		if not category then
 			utils.sendEmbed(message.channel, "**Error: group category is not set.** Please ask the server admins to set the Group Category setting (`"..guildSettings.prefix.."settings`) before using this command.", "ff0000")
 			return
 		end
-		local _, missingPermissions = commandHandler.getMissingBotPermissions(message.guild, category, {}, {"manageChannels", "manageRoles"})
+		local _, missingPermissions = commandHandler.getMissingBotPermissions(message.guild, category, {}, {"manageChannels", "manageRoles", "createInstantInvite", "addReactions"})
 		if next(missingPermissions)~=nil then
 			commandHandler.sendBotPermissionErrorForChannel(message.channel, guildSettings.prefix..self.name, category, missingPermissions)
 			return
@@ -39,9 +42,16 @@ return {
 			return
 		end
 
-		message.channel:broadcastTyping()
+		if #argString>limits.groupNameLength then
+			utils.sendEmbed(message.channel, "Group name cannot be longer than "..limits.groupNameLength.." characters.", "ff0000")
+			return
+		end
 
 		local groupNum = guildSettings.next_group_num
+		if groupNum>limits.groupNum then
+			utils.sendEmbed(message.channel, "The maximum group number ("..limits.groupNum..") has been reached. Please contact the bot developer using `"..guildSettings.prefix.."contact`.", "ff0000")
+			return
+		end
 
 		local role = message.guild:createRole("Group"..groupNum)
 		role:enableMentioning()

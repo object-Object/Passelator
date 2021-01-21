@@ -1,6 +1,8 @@
 local commandHandler = require("commandHandler")
 local utils = require("miscUtils")
 local groupUtils = require("groupUtils")
+local discordia = require("discordia")
+local limits = discordia.storage.limits
 
 return {
 	name = "name",
@@ -33,6 +35,9 @@ return {
 			return
 		elseif message.author.id~=row.creator_id then
 			utils.sendEmbed(message.channel, "Only the group's creator may set its name.", "ff0000")
+			return
+		elseif #newName>limits.groupNameLength then
+			utils.sendEmbed(message.channel, "Group name cannot be longer than "..limits.groupNameLength.." characters.", "ff0000")
 			return
 		end
 

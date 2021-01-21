@@ -58,8 +58,19 @@ CREATE TABLE IF NOT EXISTS user_roles (
 	user_id TEXT,
 	role_id TEXT,
 	user_in_guild BOOLEAN DEFAULT 1 NOT NULL CHECK (user_in_guild IN (0,1)),
+	is_from_link BOOLEAN DEFAULT 0 NOT NULL CHECK (user_in_guild IN (0,1)),
 	UNIQUE (guild_id, user_id, role_id),
 	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id)
+);
+]])
+conn:exec([[
+CREATE TABLE IF NOT EXISTS group_links (
+	linkset_num REAL,
+	group_num REAL,
+	guild_id TEXT,
+	UNIQUE(group_num, guild_id),
+	FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id),
+	FOREIGN KEY (group_num, guild_id) REFERENCES groups(group_num, guild_id)
 );
 ]])
 print("Done.")
