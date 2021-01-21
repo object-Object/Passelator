@@ -320,34 +320,36 @@ commandHandler.doCommands = function(message, guildSettings, conn)
 			args = argString:split("%s")
 		end
 		local commandSettings = commandHandler.getCommandSettings(message.guild, command, conn)
-		if commandSettings.is_enabled then
-			if guildSettings.delete_command_messages then
-				message:delete()
-			end
-			local botMember = message.guild:getMember(message.client.user)
-			if not botMember:hasPermission(message.channel, "embedLinks") then
-				message:reply("**Error**\nThis bot requires the `embedLinks` permission for all commands. Please allow this permission for this bot in any channels you want to use this bot in.")
-			elseif guildSettings.delete_command_messages and not botMember:hasPermission(message.channel, "manageMessages") then
-				utils.sendEmbed(message.channel, "This bot requires the `manageMessages` permission for all commands. Please allow this permission for this bot server-wide and/or in any channels you want to use this bot in.", "ff0000")
-			else
-				local missingBotGuildPerms, missingBotChannelPerms = commandHandler.getMissingBotPermissions(message.guild, message.channel, command.botGuildPermissions, command.botChannelPermissions)
-				if next(missingBotGuildPerms)~=nil or next(missingBotChannelPerms)~=nil then
-					sendBotPermissionError(message.channel, guildSettings.prefix..command.name, missingBotGuildPerms, missingBotChannelPerms)
-				else
-					local permissions = commandHandler.getPermissions(message.guild, command, conn)
-					local missingPermissions = commandHandler.getMissingPermissions(message.member, permissions)
-					if next(missingPermissions)~=nil then
-						sendPermissionError(message.channel, guildSettings.prefix..command.name, missingPermissions)
-					else
-						local success, err = xpcall(command.run, debug.traceback, command, message, argString, args, guildSettings, conn)
-						if not success then
-							utils.sendEmbed(message.channel, "The bot has encountered an unexpected error. Your command likely did not finish running. This issue has been reported, but if possible, please contact the bot developer using `"..guildSettings.prefix.."contact` to provide more information about what you were doing when this issue occurred.", "ff0000")
-							utils.logError(message.guild, err, message.content)
-							print("Bot crashed! Guild: "..message.guild.name.." ("..message.guild.id..")\nCommand: "..message.content.."\n"..err)
-						end
-					end
-				end
-			end
+		if not commandSettings.is_enabled then
+			return
+		end
+		if guildSettings.delete_command_messages then
+			message:delete()
+		end
+		local botMember = message.guild:getMember(message.client.user)
+		if not botMember:hasPermission(message.channel, "embedLinks") then
+			message:reply("This bot requires the `embedLinks` permission for all commands. Please allow this permission for this bot in any channels you want to use this bot in.")
+			return
+		elseif guildSettings.delete_command_messages and not botMember:hasPermission(message.channel, "manageMessages") then
+			utils.sendEmbed(message.channel, "This bot requires the `manageMessages` permission for all commands. Please allow this permission for this bot server-wide and/or in any channels you want to use this bot in.", "ff0000")
+			return
+		end
+		local missingBotGuildPerms, missingBotChannelPerms = commandHandler.getMissingBotPermissions(message.guild, message.channel, command.botGuildPermissions, command.botChannelPermissions)
+		if next(missingBotGuildPerms)~=nil or next(missingBotChannelPerms)~=nil then
+			sendBotPermissionError(message.channel, guildSettings.prefix..command.name, missingBotGuildPerms, missingBotChannelPerms)
+			return
+		end
+		local permissions = commandHandler.getPermissions(message.guild, command, conn)
+		local missingPermissions = commandHandler.getMissingPermissions(message.member, permissions)
+		if next(missingPermissions)~=nil then
+			sendPermissionError(message.channel, guildSettings.prefix..command.name, missingPermissions)
+			return
+		end
+		local success, err = xpcall(command.run, debug.traceback, command, message, argString, args, guildSettings, conn)
+		if not success then
+			utils.sendEmbed(message.channel, "The bot has encountered an unexpected error. Your command likely did not finish running. This issue has been reported, but if possible, please contact the bot developer using `"..guildSettings.prefix.."contact` to provide more information about what you were doing when this issue occurred.", "ff0000")
+			utils.logError(message.guild, err, message.content)
+			print("Bot crashed! Guild: "..message.guild.name.." ("..message.guild.id..")\nCommand: "..message.content.."\n"..err)
 		end
 	end
 end
