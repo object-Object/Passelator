@@ -136,7 +136,7 @@ end
 -- string should contain command name
 commandHandler.subcommandFromString = function(command, input)
 	local inputType = type(input)
-	assert(inputType=="table" or inputType=="string", "Expected table or string for argument #1, got "..inputType)
+	assert(inputType=="table" or inputType=="string", "Expected table or string for argument 2, got "..inputType)
 	local splitStr = inputType=="table" and input or input:split("%s+")
 	table.remove(splitStr, 1) -- remove the base command name from splitStr
 	local output = command
